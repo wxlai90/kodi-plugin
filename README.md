@@ -18,13 +18,13 @@ class MainController:
     @action(results_in="screen")
     def landing_screen(params=None):
         items = [
-            Item(name="A Kodi selection", description="Some description"),
-            Item(name="Another Kodi selection",
-                 description="Even more descrition with params", params={'repeatable': True})
+            Item(name="Go to another screen", description="Some description", params={'path': 'another_screen'}),
+            Item(name="Play a video",
+                 description="..", to_play='$video_url')
         ]
 
-        # Item[] Items, String: Screen Title
-        return items, None
+        # Item[] Items
+        return items
 ```
 
 ## Item DTO
