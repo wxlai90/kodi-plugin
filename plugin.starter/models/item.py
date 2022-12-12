@@ -1,25 +1,26 @@
+from models.params import Params
+
+
 class Item:
     def __init__(self, **kargs) -> None:
         '''
             name:str
             description:str
             image: str
-            params:dict 
+            params:dict
         '''
         self.name = kargs['name']
         self.description = kargs['description']
         self.image = kargs['image'] if 'image' in kargs else None
         self.params = kargs['params'] if 'params' in kargs else None
-        self.to_play = kargs['to_play'] if 'to_play' in kargs else None
+        self.playable = kargs['playable'] if 'playable' in kargs else False
 
         # params and to_play should be mutually exclusive
-        if self.params and self.to_play:
-            raise Exception(
-                'Exactly one of either "params" or "to_play" has to be defined. Both are defined.')
+        if not self.params:
+            raise Exception('Params must be defined')
 
-        if self.params == None and self.to_play == None:
-            raise Exception(
-                'Exactly one of either "params" or "to_play" has to be defined. None is defined.')
+        if isinstance(self.params, Params):
+            self.params = self.params.asDict()
 
     class ItemBuilder:
         def __init__(self) -> None:
@@ -27,7 +28,7 @@ class Item:
             self._description = None
             self._image = None
             self._params = None
-            self._to_play = None
+            self._playable = False
 
         def name(self, name):
             self._name = name
@@ -45,8 +46,8 @@ class Item:
             self._params = params
             return self
 
-        def to_play(self, to_play):
-            self._to_play = to_play
+        def playable(self):
+            self._playable = True
             return self
 
         def build(self):
@@ -55,5 +56,5 @@ class Item:
                 description=self._description,
                 image=self._image,
                 params=self._params,
-                to_play=self._to_play
+                playable=self._playable
             )

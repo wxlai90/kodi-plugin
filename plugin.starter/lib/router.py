@@ -2,7 +2,8 @@ import sys
 
 import xbmcgui
 import xbmcplugin
-from models.screen import Item, Screen
+from models.playable import Playable
+from models.screen import Screen
 
 _baseUrl = sys.argv[0]
 _screen = xbmcplugin
@@ -63,6 +64,10 @@ def handle_landing():
 
 
 def landing_action(func):
+    if '__landing' in routes:
+        raise Exception(
+            'Landing action has already been defined. There should only be one landing.')
+
     def wrapper(*args, **kwargs):
         screen = func(*args, **kwargs)
         createScreen(screen)
@@ -72,10 +77,20 @@ def landing_action(func):
 
 def action(func):
     def wrapper(*args, **kwargs):
-        screen = func(*args, **kwargs)
-        createScreen(screen)
+        output = func(*args, **kwargs)
+        if isinstance(output, Screen):
+            createScreen(output)
+        if isinstance(output, Playable):
+            playItem(output)
 
     routes[func.__name__] = wrapper
+
+
+def playItem(playable: Playable) -> None:
+    listItem = xbmcgui.ListItem()
+    listItem.setPath(playable.url)
+    listItem.setSubtitles(playable.subtitles)
+    _screen.setResolvedUrl(_handle, True, listItem)
 
 
 def createScreen(screen: Screen) -> None:
@@ -106,12 +121,11 @@ def createScreen(screen: Screen) -> None:
             })
 
         isFolder = True
-        if item.to_play:
+        if item.playable:
+            listItem.setProperty('IsPlayable', 'true')
             isFolder = False
-            url = item.to_play
-        else:
-            url = _formatDestination(item.params)
 
+        url = _formatDestination(item.params)
         listItems.append((url, listItem, isFolder))
 
     _screen.addDirectoryItems(_handle, listItems)
