@@ -46,8 +46,8 @@ class Item:
             self._params = params
             return self
 
-        def playable(self):
-            self._playable = True
+        def playable(self, b=True):
+            self._playable = b
             return self
 
         def build(self):

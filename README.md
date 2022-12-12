@@ -9,8 +9,13 @@ This should only be defined once and serves as the entry point into the plugin.
 ```python
 @landing_action
 def landing_screen(params=None):
-    items = [Item.ItemBuilder().name("An Item").description(
-        "Some description").params(Params().path(another_screen)).playable().build(),
+    items = [
+        Item.ItemBuilder() \
+        .name("An Item") \
+        .description("Some description") \
+        .params(Params().path(another_screen)) \
+        .playable() \
+        .build(),
     ]
 
     screen = Screen(items, 'Select a show')
@@ -22,8 +27,12 @@ def landing_screen(params=None):
 ```python
 @action
 def another_screen(params=None):
-    items = [Item.ItemBuilder().name("View all videos").description(
-        "Some description").params(Params().path(screen_that_contains_playable_items)).build(),
+    items = [
+        Item.ItemBuilder() \
+        .name("View all videos") \
+        .description("Some description") \
+        .params(Params().path(screen_that_contains_playable_items)) \
+        .build(),
     ]
 
     screen = Screen(items, 'Select a show')
@@ -35,8 +44,13 @@ Use .playable() to define an item to be resolved to a stream instead of a select
 ```python
 @action
 def screen_that_contains_playable_items(params=None):
-    items = [Item.ItemBuilder().name("Select a video").description(
-        "Some description").params(Params().path(resolve_and_play_video)).playable().build(),
+    items = [
+        Item.ItemBuilder() \
+        .name("Select a video") \
+        .description("Some description") \
+        .params(Params().path(resolve_and_play_video)) \
+        .playable() \
+        .build(),
     ]
 
     screen = Screen(items, 'Select a show')
@@ -50,7 +64,9 @@ Use the same `@action` decorator but return a `Playable` model for resolving to 
 def resolve_and_play_video(params=None):
     url = resolveStream()
 
-    playable = Playable.PlayableBuilder().url(url).build()
+    playable = Playable.PlayableBuilder()\
+    .url(url) \
+    .build()
 
     return playable
 
