@@ -63,25 +63,35 @@ def handle_landing():
     routes['__landing']()
 
 
-def landing_action(func):
+def config(cfg):
+    global default_name
+    default_name = cfg.name
+
+
+def landing_screen(func):
     if '__landing' in routes:
         raise Exception(
-            'Landing action has already been defined. There should only be one landing.')
+            'Landing screen has already been defined. There should only be one landing.')
 
     def wrapper(*args, **kwargs):
-        screen = func(*args, **kwargs)
-        createScreen(screen)
+        output = func(*args, **kwargs)
+        createScreen(output)
 
     routes['__landing'] = wrapper
 
 
-def action(func):
+def playable(func):
     def wrapper(*args, **kwargs):
         output = func(*args, **kwargs)
-        if isinstance(output, Screen):
-            createScreen(output)
-        if isinstance(output, Playable):
-            playItem(output)
+        playItem(output)
+
+    routes[func.__name__] = wrapper
+
+
+def screen(func):
+    def wrapper(*args, **kwargs):
+        output = func(*args, **kwargs)
+        createScreen(output)
 
     routes[func.__name__] = wrapper
 

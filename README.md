@@ -2,19 +2,19 @@
 
 Starter for kodi plugin development
 
-### Create a landing screen by decorating it with @landing_action.
+### Create a landing screen by decorating it with @landing_screen.
 
 This should only be defined once and serves as the entry point into the plugin.
 
 ```python
-@landing_action
-def landing_screen(params=None):
+@landing_screen
+def my_landing(params=None):
     items = [
-        Item.ItemBuilder() \
-        .name("An Item") \
-        .description("Some description") \
-        .params(Params().path(another_screen)) \
-        .playable() \
+        Item.ItemBuilder()
+        .name("An Item")
+        .description("Some description")
+        .params(Params().path(another_screen))
+        .playable()
         .build(),
     ]
 
@@ -22,16 +22,16 @@ def landing_screen(params=None):
     return screen
 ```
 
-### Create a new screen to be rendered with @action
+### Create a new screen to be rendered with @screen
 
 ```python
-@action
+@screen
 def another_screen(params=None):
     items = [
-        Item.ItemBuilder() \
-        .name("View all videos") \
-        .description("Some description") \
-        .params(Params().path(screen_that_contains_playable_items)) \
+        Item.ItemBuilder()
+        .name("View all videos")
+        .description("Some description")
+        .params(Params().path(screen_that_contains_playable_items))
         .build(),
     ]
 
@@ -39,17 +39,17 @@ def another_screen(params=None):
     return screen
 ```
 
-Use .playable() to define an item to be resolved to a stream instead of a selection.
+For items that should resolve to a stream.
 
 ```python
-@action
+@playable
 def screen_that_contains_playable_items(params=None):
     items = [
-        Item.ItemBuilder() \
-        .name("Select a video") \
-        .description("Some description") \
-        .params(Params().path(resolve_and_play_video)) \
-        .playable() \
+        Item.ItemBuilder()
+        .name("Select a video")
+        .description("Some description")
+        .params(Params().path(resolve_and_play_video))
+        .playable()
         .build(),
     ]
 
@@ -57,15 +57,15 @@ def screen_that_contains_playable_items(params=None):
     return screen
 ```
 
-Use the same `@action` decorator but return a `Playable` model for resolving to a stream instead of displaying a new screen.
+Use `@playable` decorator and return a `Playable` model for resolving to a stream instead of displaying a new screen.
 
 ```python
-@action
+@playable
 def resolve_and_play_video(params=None):
     url = resolveStream()
 
     playable = Playable.PlayableBuilder()\
-    .url(url) \
+    .url(url)
     .build()
 
     return playable
@@ -90,9 +90,13 @@ Each `Item` object represents a selection in the screen, name and description fi
 
 ## Params DTO
 
-Params is represented as a dictionary inside `Item`, this `Params` model only provides a helper method `.path()` since that is a mandatory field. It is also possible to pass in a dictionary directly.
+Params is internally represented as a dictionary of `Item`, this `Params` model only provides a helper method `.path()` since that is a mandatory field. It is also possible to pass in a dictionary directly.
 
-`.path()` takes in either a function or the name of the function as a string. This provides some flexibility as the function might not be in the same package and we need not have unnecessary imports.
+`.path()` takes in the name of the function as a string. This provides some flexibility as the function might not be in the same package and we need not have unnecessary imports.
+
+## Playable DTO
+
+`Playable` is an object with `url:string` and `subtitles:string[]`.
 
 ### Summary
 
