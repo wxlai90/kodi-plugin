@@ -48,7 +48,7 @@ def screen_that_contains_playable_items(params=None):
         Item.ItemBuilder()
         .name("Select a video")
         .description("Some description")
-        .params(Params().path(resolve_and_play_video))
+        .params('path', 'resolve_and_play_video')
         .playable()
         .build(),
     ]
@@ -87,12 +87,8 @@ Each `Screen` holds information about what to render on screen, this includes sc
 Each `Item` object represents a selection in the screen, name and description fields are mandatory, the rest are optional.
 
 \*More fields from the official Kodi API can be set manually.
-
-## Params DTO
-
-Params is internally represented as a dictionary of `Item`, this `Params` model only provides a helper method `.path()` since that is a mandatory field. It is also possible to pass in a dictionary directly.
-
-`.path()` takes in the name of the function as a string. This provides some flexibility as the function might not be in the same package and we need not have unnecessary imports.
+.
+Params is internally represented as a dictionary of `Item`, call with key and value - `.params(key, value)`.
 
 ## Playable DTO
 

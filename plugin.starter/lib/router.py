@@ -1,5 +1,7 @@
+import functools
 import sys
 
+import xbmc
 import xbmcgui
 import xbmcplugin
 from models.playable import Playable
@@ -61,6 +63,25 @@ def _formatDestination(kwargs):
 
 def handle_landing():
     routes['__landing']()
+
+
+def get_input(**kwargs):
+    prompt = kwargs['prompt']
+    key = kwargs['key']
+    placeholder = kwargs['placeholder'] if 'placeholder' in kwargs else ''
+
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            keyboard = xbmc.Keyboard(placeholder, prompt)
+            keyboard.doModal()
+            inputStr = keyboard.getText()
+            params = args[0]
+            params[key] = inputStr
+            return fn(*args, **kwargs)
+
+        return wrapper
+    return decorator
 
 
 def config(cfg):

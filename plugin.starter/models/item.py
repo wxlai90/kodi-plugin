@@ -1,6 +1,3 @@
-from models.params import Params
-
-
 class Item:
     def __init__(self, **kargs) -> None:
         '''
@@ -19,15 +16,12 @@ class Item:
         if not self.params:
             raise Exception('Params must be defined')
 
-        if isinstance(self.params, Params):
-            self.params = self.params.asDict()
-
     class ItemBuilder:
         def __init__(self) -> None:
             self._name = None
             self._description = None
             self._image = None
-            self._params = None
+            self._params = {}
             self._playable = False
 
         def name(self, name):
@@ -42,8 +36,8 @@ class Item:
             self._image = image
             return self
 
-        def params(self, params):
-            self._params = params
+        def params(self, key, value):
+            self._params[key] = value
             return self
 
         def playable(self, b=True):
