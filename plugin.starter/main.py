@@ -5,11 +5,6 @@ from lib import router
 from screens.main_screen import *
 
 
-@router.config
-class KodiConfig:
-    name = "Kodi Plugin"
-
-
 def main():
     if sys.argv[2] == '':
         router.handle_landing()
