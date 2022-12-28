@@ -1,5 +1,6 @@
 import functools
 import sys
+from urllib.parse import unquote
 
 import xbmc
 import xbmcgui
@@ -13,6 +14,7 @@ _handle = int(sys.argv[1])
 
 
 routes = {}
+playables = set()
 default_name = ''
 
 
@@ -42,8 +44,10 @@ def handle(query_string):
             'No handler registered for this path [{}]'.format(params['path']))
 
     func = routes[params['path']]
-    # might add in logger here.
-    # calls func with query_string params
+
+    for k, v in params.items():
+        params[k] = unquote(v)
+
     func(params)
 
 
@@ -107,6 +111,7 @@ def playable(func):
         playItem(output)
 
     routes[func.__name__] = wrapper
+    playables.add(func.__name__)
 
 
 def screen(func):
@@ -152,7 +157,7 @@ def createScreen(screen: Screen) -> None:
             })
 
         isFolder = True
-        if item.playable:
+        if item.params['path'] in playables:
             listItem.setProperty('IsPlayable', 'true')
             isFolder = False
 

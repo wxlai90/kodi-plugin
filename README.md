@@ -14,7 +14,6 @@ def my_landing(params=None):
         .name("An Item")
         .description("Some description")
         .params(Params().path(another_screen))
-        .playable()
         .build(),
     ]
 
@@ -49,7 +48,6 @@ def screen_that_contains_playable_items(params=None):
         .name("Select a video")
         .description("Some description")
         .params('path', 'resolve_and_play_video')
-        .playable()
         .build(),
     ]
 

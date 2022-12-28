@@ -7,7 +7,7 @@ from models.screen import Screen
 @landing_screen
 def my_landing(params=None):
     items = [Item.ItemBuilder().name("Select a video").description(
-        "Some description").params('path', 'resolve_and_play_video').playable().build(),
+        "Some description").params('path', 'resolve_and_play_video').build(),
     ]
 
     screen = Screen(items, 'Select a show')
