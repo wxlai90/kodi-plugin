@@ -1,50 +1,31 @@
-from urllib.parse import quote_plus
+from dataclasses import dataclass, field
+from typing import Dict, Optional, Union, Callable, Any
 
 
+@dataclass
 class Item:
-    def __init__(self, **kargs) -> None:
-        '''
-            name:str
-            description:str
-            image: str
-            params:dict
-        '''
-        self.name = kargs['name']
-        self.description = kargs['description']
-        self.image = kargs['image'] if 'image' in kargs else None
-        self.params = kargs['params'] if 'params' in kargs else None
+    name: str
+    path: str
+    kwargs: Dict[str, Any] = field(default_factory=dict)
+    description: str = ""
+    image: Optional[str] = None
+    is_playable: bool = False
 
-        # params and to_play should be mutually exclusive
-        if not self.params:
-            raise Exception('Params must be defined')
-
-    class ItemBuilder:
-        def __init__(self) -> None:
-            self._name = None
-            self._description = None
-            self._image = None
-            self._params = {}
-
-        def name(self, name):
-            self._name = name
-            return self
-
-        def description(self, description):
-            self._description = description
-            return self
-
-        def image(self, image):
-            self._image = image
-            return self
-
-        def params(self, key, value):
-            self._params[key] = quote_plus(value)
-            return self
-
-        def build(self):
-            return Item(
-                name=self._name,
-                description=self._description,
-                image=self._image,
-                params=self._params,
-            )
+    @classmethod
+    def create(cls, name: str, handler: Union[str, Callable], description: str = "", image: str = None, is_playable: bool = None, **kwargs):
+        """
+        Factory method to create an Item with a handler function and arguments.
+        
+        :param name: Label of the item
+        :param handler: The function (or string name) that handles the click
+        :param description: Description of the item
+        :param image: URL or path to the image
+        :param is_playable: Explicitly set if the item is playable. If None, detects from handler.
+        :param kwargs: Arguments to pass to the handler (e.g., video_id='123')
+        """
+        path = handler.__name__ if callable(handler) else str(handler)
+        
+        if is_playable is None:
+             is_playable = getattr(handler, '_is_playable', False) if callable(handler) else False
+             
+        return cls(name=name, path=path, kwargs=kwargs, description=description, image=image, is_playable=is_playable)

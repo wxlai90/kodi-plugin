@@ -1,16 +1,7 @@
 import sys
+from lib.plugin import plugin
+# Import screens to register routes
+import screens.main_screen
 
-from lib import router
-# initialize
-from screens.main_screen import *
-
-
-def main():
-    if sys.argv[2] == '':
-        router.handle_landing()
-        return
-
-    router.handle(sys.argv[2])
-
-
-main()
+if __name__ == '__main__':
+    plugin.run()

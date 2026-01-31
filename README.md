@@ -1,100 +1,129 @@
-# kodi-plugin
+# Kodi Plugin Starter
 
-Starter for kodi plugin development
+A modern, lightweight micro-framework for building Kodi plugins (Matrix/Nexus/Omega+).
 
-### Create a landing screen by decorating it with @landing_screen.
+## Features
 
-This should only be defined once and serves as the entry point into the plugin.
+-   **Decorators for Routing**: Clean, Flask-like routing syntax (`@plugin.route`, `@plugin.landing`).
+-   **Type-Safe Models**: Uses Python dataclasses for `Item`, `Screen`, and `Playable`.
+-   **Auto-Injection**: Function arguments are automatically populated from URL parameters.
+-   **Developer Experience**: Simple factory methods (`Item.create`) to avoid boilerplate.
+
+## Getting Started
+
+### 1. Define Routes
+
+The core of the framework is the `plugin` instance. You define screens by decorating functions. 
+The decorator `@plugin.route` uses the function name as the route path by default, ensuring your links always work.
+
+#### Landing Screen
+
+The entry point of your addon.
 
 ```python
-@landing_screen
-def my_landing(params=None):
+from lib.plugin import plugin
+from models.item import Item
+from models.screen import Screen
+
+@plugin.landing()
+def my_landing():
     items = [
-        Item.ItemBuilder()
-        .name("An Item")
-        .description("Some description")
-        .params(Params().path(another_screen))
-        .build(),
+        Item.create(
+            name="Browse Categories",
+            handler=list_categories,
+            description="View all video categories"
+        ),
+        Item.create(
+            name="Search",
+            handler=search_video
+        )
     ]
-
-    screen = Screen(items, 'Select a show')
-    return screen
+    return Screen(items, 'Home')
 ```
 
-### Create a new screen to be rendered with @screen
+#### Standard Screens
+
+Create a screen that lists more items (folders).
 
 ```python
-@screen
-def another_screen(params=None):
+@plugin.route
+def list_categories():
     items = [
-        Item.ItemBuilder()
-        .name("View all videos")
-        .description("Some description")
-        .params(Params().path(screen_that_contains_playable_items))
-        .build(),
+        Item.create(name="Action", handler=list_videos, category="action"),
+        Item.create(name="Comedy", handler=list_videos, category="comedy"),
     ]
-
-    screen = Screen(items, 'Select a show')
-    return screen
+    return Screen(items, 'Categories')
 ```
 
-For items that should resolve to a stream.
+### 2. Passing Arguments
+
+You can pass arguments to your handlers. The framework automatically injects them based on the function signature.
 
 ```python
-@playable
-def screen_that_contains_playable_items(params=None):
+# The 'category' argument is auto-filled from the item creation above
+@plugin.route
+def list_videos(category):
+    # Fetch videos for this category...
     items = [
-        Item.ItemBuilder()
-        .name("Select a video")
-        .description("Some description")
-        .params('path', 'resolve_and_play_video')
-        .build(),
+        Item.create(
+            name=f"Best {category} Movie", 
+            handler=play_video, 
+            video_id="123"
+        )
     ]
-
-    screen = Screen(items, 'Select a show')
-    return screen
+    return Screen(items, f"{category.title()} Movies")
 ```
 
-Use `@playable` decorator and return a `Playable` model for resolving to a stream instead of displaying a new screen.
+### 3. Playable Items
+
+To play a video, use the `@plugin.playable` decorator and return a `Playable` object.
 
 ```python
-@playable
-def resolve_and_play_video(params=None):
-    url = resolveStream()
+from models.playable import Playable
 
-    playable = Playable.PlayableBuilder()\
-    .url(url)
-    .build()
-
-    return playable
-
-
-def resolveStream():
-    # do some resolving logic
-
-    return "https://www.w3schools.com/html/mov_bbb.mp4"
-
+@plugin.playable
+def play_video(video_id):
+    # Resolve the actual stream URL here
+    stream_url = "https://example.com/stream.mp4"
+    
+    return Playable(
+        url=stream_url,
+        subtitles=['https://example.com/sub.srt'] # Optional
+    )
 ```
 
-## Screen DTO
+### 4. User Input (Search)
 
-Each `Screen` holds information about what to render on screen, this includes screen title and the items to be shown.
+You can use standard Kodi dialogs.
 
-## Item DTO
+```python
+import xbmc
 
-Each `Item` object represents a selection in the screen, name and description fields are mandatory, the rest are optional.
+@plugin.route
+def search_video():
+    keyboard = xbmc.Keyboard('', 'Search')
+    keyboard.doModal()
+    
+    if keyboard.isConfirmed():
+        query = keyboard.getText()
+        # Redirect to results
+        return search_results(query=query)
 
-\*More fields from the official Kodi API can be set manually.
-.
-Params is internally represented as a dictionary of `Item`, call with key and value - `.params(key, value)`.
+@plugin.route
+def search_results(query):
+    # ... return Screen with results
+    pass
+```
 
-## Playable DTO
+## Structure
 
-`Playable` is an object with `url:string` and `subtitles:string[]`.
+-   `lib/plugin.py`: Core framework logic.
+-   `models/`: Data structures (`Item`, `Screen`, `Playable`).
+-   `screens/`: Your route handlers.
+-   `main.py`: Entry point.
 
-### Summary
+## Installation
 
-Feel free to add in more custom models as needed.
-
-For an example plugin using this setup, refer to my [MeWatch Kodi Plugin](https://github.com/wxlai90/mewatch-sg/)
-.
+1.  Copy `plugin.starter` to your Kodi addons directory (rename it to your plugin ID).
+2.  Update `addon.xml` with your details.
+3.  Start coding in `screens/main_screen.py`.
